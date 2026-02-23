@@ -24,6 +24,7 @@ class FocusTargetRepository @Inject constructor(
     suspend fun updateTarget(target: FocusTarget) = focusTargetDao.update(target)
     suspend fun deleteTarget(target: FocusTarget) = focusTargetDao.delete(target)
     suspend fun toggleActive(id: Int, active: Boolean) = focusTargetDao.setActive(id, active)
+    suspend fun getTargetById(id: Int): FocusTarget? = focusTargetDao.getById(id)
 
     /**
      * Compute today's progress for each active target.

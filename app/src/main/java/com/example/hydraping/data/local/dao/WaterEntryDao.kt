@@ -23,4 +23,7 @@ interface WaterEntryDao {
 
     @Query("DELETE FROM water_entries WHERE id = :id")
     suspend fun deleteById(id: Int)
+
+    @Query("DELETE FROM water_entries")
+    suspend fun deleteAll()
 }

@@ -6,10 +6,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.hydraping.presentation.screens.HistoryScreen
 import com.example.hydraping.presentation.screens.HomeScreen
+import com.example.hydraping.presentation.screens.RemindScreen
 import com.example.hydraping.presentation.screens.SettingsScreen
 import com.example.hydraping.presentation.screens.CreateTargetScreen
 
@@ -37,17 +40,33 @@ fun NavGraph(navController: NavHostController) {
             HomeScreen(
                 onNavigateToCreateTarget = {
                     navController.navigate(Screen.CreateTarget.route)
+                },
+                onNavigateToEditTarget = { targetId ->
+                    navController.navigate(Screen.EditTarget.withId(targetId))
                 }
             )
         }
         composable(Screen.History.route) {
             HistoryScreen()
         }
+        composable(Screen.Remind.route) {
+            RemindScreen()
+        }
         composable(Screen.Settings.route) {
             SettingsScreen()
         }
         composable(Screen.CreateTarget.route) {
             CreateTargetScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = Screen.EditTarget.route,
+            arguments = listOf(navArgument("targetId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val targetId = backStackEntry.arguments?.getInt("targetId") ?: return@composable
+            CreateTargetScreen(
+                targetId = targetId,
                 onBack = { navController.popBackStack() }
             )
         }

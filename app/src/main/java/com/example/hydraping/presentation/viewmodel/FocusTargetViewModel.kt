@@ -25,6 +25,7 @@ data class FocusTargetUiState(
 )
 
 data class CreateTargetState(
+    val editingTargetId: Int? = null,
     val startHour: Int = 9,
     val startMinute: Int = 0,
     val endHour: Int = 11,
@@ -33,7 +34,9 @@ data class CreateTargetState(
     val repeatMode: RepeatMode = RepeatMode.DAILY,
     val overlapError: Boolean = false,
     val validationError: String? = null
-)
+) {
+    val isEditing: Boolean get() = editingTargetId != null
+}
 
 @HiltViewModel
 class FocusTargetViewModel @Inject constructor(
@@ -129,6 +132,25 @@ class FocusTargetViewModel @Inject constructor(
         _createState.value = _createState.value.copy(repeatMode = mode)
     }
 
+    fun loadTargetForEdit(targetId: Int) {
+        viewModelScope.launch {
+            val target = repository.getTargetById(targetId) ?: return@launch
+            _createState.value = CreateTargetState(
+                editingTargetId = target.id,
+                startHour = target.startHour,
+                startMinute = target.startMinute,
+                endHour = target.endHour,
+                endMinute = target.endMinute,
+                targetAmountMl = target.targetAmountMl,
+                repeatMode = try { RepeatMode.valueOf(target.repeatMode) } catch (_: Exception) { RepeatMode.DAILY }
+            )
+        }
+    }
+
+    fun resetCreateState() {
+        _createState.value = CreateTargetState()
+    }
+
     fun saveTarget(onSuccess: () -> Unit) {
         viewModelScope.launch {
             val state = _createState.value
@@ -152,6 +174,7 @@ class FocusTargetViewModel @Inject constructor(
             }
 
             val target = FocusTarget(
+                id = state.editingTargetId ?: 0,
                 startHour = state.startHour,
                 startMinute = state.startMinute,
                 endHour = state.endHour,
@@ -160,7 +183,11 @@ class FocusTargetViewModel @Inject constructor(
                 repeatMode = state.repeatMode.name
             )
 
-            repository.addTarget(target)
+            if (state.isEditing) {
+                repository.updateTarget(target)
+            } else {
+                repository.addTarget(target)
+            }
             // Reset form
             _createState.value = CreateTargetState()
             onSuccess()

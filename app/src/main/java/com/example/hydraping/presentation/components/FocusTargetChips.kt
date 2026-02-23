@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.hydraping.data.local.entity.formatTime12
 import com.example.hydraping.domain.model.WindowProgress
 import com.example.hydraping.domain.model.WindowStatus
 
@@ -42,6 +43,7 @@ import com.example.hydraping.domain.model.WindowStatus
 fun FocusTargetChips(
     progressList: List<WindowProgress>,
     onAddTarget: () -> Unit,
+    onEditTarget: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -114,7 +116,10 @@ fun FocusTargetChips(
                 contentPadding = PaddingValues(end = 4.dp)
             ) {
                 items(progressList, key = { it.target.id }) { wp ->
-                    FocusChip(wp)
+                    FocusChip(
+                        windowProgress = wp,
+                        onClick = { onEditTarget(wp.target.id) }
+                    )
                 }
             }
         }
@@ -122,7 +127,10 @@ fun FocusTargetChips(
 }
 
 @Composable
-private fun FocusChip(windowProgress: WindowProgress) {
+private fun FocusChip(
+    windowProgress: WindowProgress,
+    onClick: () -> Unit = {}
+) {
     val isActive = windowProgress.status == WindowStatus.ACTIVE
     val isCompleted = windowProgress.status == WindowStatus.COMPLETED
     val isMissed = windowProgress.status == WindowStatus.MISSED
@@ -139,6 +147,7 @@ private fun FocusChip(windowProgress: WindowProgress) {
     )
 
     Card(
+        onClick = onClick,
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         modifier = Modifier.width(160.dp)
@@ -241,8 +250,7 @@ fun FocusTargetBanner(
     windowProgress: WindowProgress,
     modifier: Modifier = Modifier
 ) {
-    val endTimeLabel = String.format(
-        "%02d:%02d",
+    val endTimeLabel = formatTime12(
         windowProgress.target.endHour,
         windowProgress.target.endMinute
     )

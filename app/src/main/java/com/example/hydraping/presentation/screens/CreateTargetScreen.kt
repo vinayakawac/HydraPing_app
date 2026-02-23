@@ -34,6 +34,8 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,17 +49,33 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.hydraping.data.local.entity.RepeatMode
+import com.example.hydraping.data.local.entity.formatTime12
 import com.example.hydraping.presentation.viewmodel.FocusTargetViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateTargetScreen(
     onBack: () -> Unit,
+    targetId: Int? = null,
     viewModel: FocusTargetViewModel = hiltViewModel()
 ) {
     val state by viewModel.createState.collectAsStateWithLifecycle()
     var showStartPicker by remember { mutableStateOf(false) }
     var showEndPicker by remember { mutableStateOf(false) }
+
+    // Load existing target when editing
+    LaunchedEffect(targetId) {
+        if (targetId != null) {
+            viewModel.loadTargetForEdit(targetId)
+        } else {
+            viewModel.resetCreateState()
+        }
+    }
+
+    // Clean up on exit
+    DisposableEffect(Unit) {
+        onDispose { viewModel.resetCreateState() }
+    }
 
     Column(
         modifier = Modifier
@@ -82,7 +100,7 @@ fun CreateTargetScreen(
             }
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "New Focus Target",
+                text = if (state.isEditing) "Edit Focus Target" else "New Focus Target",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -290,7 +308,7 @@ fun CreateTargetScreen(
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Create Target",
+                    text = if (state.isEditing) "Save Changes" else "Create Target",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimary
@@ -350,7 +368,7 @@ private fun TimeButton(
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Text(
-                text = String.format("%02d:%02d", hour, minute),
+                text = formatTime12(hour, minute),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -372,7 +390,7 @@ private fun TargetTimePickerDialog(
     val timePickerState = rememberTimePickerState(
         initialHour = initialHour,
         initialMinute = initialMinute,
-        is24Hour = true
+        is24Hour = false
     )
 
     Dialog(onDismissRequest = onDismiss) {

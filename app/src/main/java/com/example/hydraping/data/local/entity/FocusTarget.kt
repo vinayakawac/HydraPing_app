@@ -24,9 +24,9 @@ data class FocusTarget(
     val isActive: Boolean = true,
     val createdAt: Long = System.currentTimeMillis()
 ) {
-    /** "09:00–11:00" display label */
+    /** "9:00 AM – 11:00 AM" display label */
     val timeRangeLabel: String
-        get() = String.format("%02d:%02d–%02d:%02d", startHour, startMinute, endHour, endMinute)
+        get() = "${formatTime12(startHour, startMinute)} – ${formatTime12(endHour, endMinute)}"
 
     /** Total window length in minutes */
     val durationMinutes: Int
@@ -36,4 +36,15 @@ data class FocusTarget(
             return if (endTotal > startTotal) endTotal - startTotal
             else (24 * 60 - startTotal) + endTotal
         }
+}
+
+/** Convert 24-hour time to 12-hour AM/PM string, e.g. 14:05 → "2:05 PM" */
+fun formatTime12(hour: Int, minute: Int): String {
+    val amPm = if (hour < 12) "AM" else "PM"
+    val h = when {
+        hour == 0 -> 12
+        hour > 12 -> hour - 12
+        else -> hour
+    }
+    return String.format("%d:%02d %s", h, minute, amPm)
 }

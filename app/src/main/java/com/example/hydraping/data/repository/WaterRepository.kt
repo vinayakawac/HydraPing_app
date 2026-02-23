@@ -87,6 +87,13 @@ class WaterRepository @Inject constructor(
         notificationsEnabled?.let { preferencesDataStore.updateNotificationsEnabled(it) }
     }
 
+    // Extended settings — delegates directly to DataStore
+    val preferencesStore: PreferencesDataStore get() = preferencesDataStore
+
+    suspend fun clearAllHistory() {
+        waterEntryDao.deleteAll()
+    }
+
     private fun getDayBounds(timeMillis: Long): Pair<Long, Long> {
         val calendar = Calendar.getInstance().apply {
             this.timeInMillis = timeMillis

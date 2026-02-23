@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,10 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.hydraping.data.local.PreferencesDataStore
+import com.example.hydraping.data.local.ThemeMode
 import com.example.hydraping.presentation.navigation.NavGraph
 import com.example.hydraping.presentation.navigation.Screen
 import com.example.hydraping.ui.theme.HydraPingTheme
@@ -56,7 +59,14 @@ class MainActivity : ComponentActivity() {
         requestNotificationPermission()
         scheduleReminders()
         setContent {
-            HydraPingTheme {
+            val themeMode by preferencesDataStore.themeFlow.collectAsStateWithLifecycle(
+                initialValue = ThemeMode.SYSTEM
+            )
+            val dynamicColor by preferencesDataStore.dynamicColorFlow.collectAsStateWithLifecycle(
+                initialValue = true
+            )
+
+            HydraPingTheme(themeMode = themeMode, dynamicColor = dynamicColor) {
                 MainApp()
             }
         }
@@ -94,8 +104,9 @@ fun MainApp() {
     val navController = rememberNavController()
     val items = listOf(
         BottomNavItem(Screen.Home, Icons.Filled.WaterDrop, "Sip"),
-        BottomNavItem(Screen.Settings, Icons.Filled.Notifications, "Remind"),
-        BottomNavItem(Screen.History, Icons.Filled.BarChart, "States")
+        BottomNavItem(Screen.Remind, Icons.Filled.Notifications, "Remind"),
+        BottomNavItem(Screen.History, Icons.Filled.BarChart, "States"),
+        BottomNavItem(Screen.Settings, Icons.Filled.Settings, "Settings")
     )
 
     Scaffold(

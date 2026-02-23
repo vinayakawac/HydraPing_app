@@ -64,6 +64,7 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     onNavigateToCreateTarget: () -> Unit = {},
+    onNavigateToEditTarget: (Int) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
     focusTargetViewModel: FocusTargetViewModel = hiltViewModel()
 ) {
@@ -182,7 +183,8 @@ fun HomeScreen(
         item {
             FocusTargetChips(
                 progressList = focusState.allProgress,
-                onAddTarget = onNavigateToCreateTarget
+                onAddTarget = onNavigateToCreateTarget,
+                onEditTarget = onNavigateToEditTarget
             )
         }
 
