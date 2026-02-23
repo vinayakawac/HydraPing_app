@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.hydraping.data.local.HydrationDatabase
 import com.example.hydraping.data.local.PreferencesDataStore
+import com.example.hydraping.data.local.dao.FocusTargetDao
 import com.example.hydraping.data.local.dao.WaterEntryDao
 import dagger.Module
 import dagger.Provides
@@ -23,12 +24,19 @@ object AppModule {
             context,
             HydrationDatabase::class.java,
             "hydration_database"
-        ).build()
+        )
+            .addMigrations(HydrationDatabase.MIGRATION_1_2)
+            .build()
     }
 
     @Provides
     fun provideWaterEntryDao(database: HydrationDatabase): WaterEntryDao {
         return database.waterEntryDao()
+    }
+
+    @Provides
+    fun provideFocusTargetDao(database: HydrationDatabase): FocusTargetDao {
+        return database.focusTargetDao()
     }
 
     @Provides

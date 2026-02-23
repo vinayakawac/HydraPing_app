@@ -61,7 +61,7 @@ object NotificationHelper {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Time to Hydrate! \uD83D\uDCA7")
+            .setContentTitle("Time to Hydrate!")
             .setContentText("Don't forget to drink water. Stay healthy!")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(openAppPendingIntent)
